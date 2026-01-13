@@ -1,51 +1,47 @@
 import streamlit as st
+import pypdb
 from stmol import showmol
 import py3Dmol
 
-# Page Setup
-st.set_page_config(page_title="RNA RA Vector Lab", layout="wide")
-st.title("🧬 RNA RA Vector: Human Force Encoding")
-st.subheader("Mapping Environmental Markers to the 29-Residue Helix")
+st.set_page_config(layout="wide")
+st.title("🧬 RNA RA Vector Lab: The 5 Human Stimuli")
 
-# --- SIDEBAR: THE 5 HUMAN FUNCTIONS ---
-st.sidebar.header("🕹️ Vector Modulators")
+# Sidebar - The 5 Human Vectors
+st.sidebar.header("RA Vector Modulators")
+gravity = st.sidebar.slider("1. Gravity (Vertical)", 0.0, 20.0, 9.8)
+thermal = st.sidebar.slider("2. Thermal (Vibration)", 0, 100, 37)
+light = st.sidebar.slider("3. Circadian (Light)", 0, 100, 50)
+pressure = st.sidebar.slider("4. Pressure (Atmospheric)", 0.0, 5.0, 1.0)
+ph_level = st.sidebar.slider("5. pH (Chemical)", 0.0, 14.0, 7.4)
 
-# 1. Gravity (Vertical Compression)
-gravity = st.sidebar.slider("Gravity/G-Force (m/s²)", 0.0, 20.0, 9.8)
-
-# 2. Thermal (Kinetic Jitter)
-thermal = st.sidebar.slider("Thermal Kinetic (Q)", 0, 100, 25)
-
-# 3. Circadian (Sleep/Wake State)
-state = st.sidebar.select_slider("Circadian State", options=["Deep Sleep", "Awake"])
-
-# 4. Inertia (The Pool Push)
+st.sidebar.markdown("---")
 inertia = st.sidebar.toggle("Inertial Momentum (Pool Push)")
 
-# --- LOGIC: RENDERING THE VECTOR ---
-view = py3Dmol.view(query='pdb:1EBQ') # The 29-residue RNA anchor
+# Logic for Visual Stimuli (Colors and Shapes)
+color_scheme = "spectrum"
+if light < 30: # Deep Sleep Mode
+    color_scheme = "cyan"
+    st.info("System State: Recovery (Deep Sleep)")
 
-# Visualizing the State (Sleep vs Awake)
-if state == "Deep Sleep":
-    view.setStyle({'stick': {'color': 'cyan', 'radius': 0.5}})
-    st.info("RA Vector: Low-Tension Recovery (Sleep Marker)")
-else:
-    view.setStyle({'cartoon': {'color': 'spectrum', 'arrows': True}})
-    st.success("RA Vector: High-Tension Encoding (Awake Marker)")
+# 3D Render
+view = py3Dmol.view(query='pdb:1EBQ')
+view.setStyle({'cartoon': {'color': color_scheme}})
 
-# Applying Gravity (Zoom acts as axial compression)
-view.zoom(1.0 + (gravity/20))
+# ADDING THE VISUAL VECTORS (Stimuli)
+# This adds a visual 'force' cylinder to represent the RA Vector
+view.addCylinder({
+    'start': {'x': 0, 'y': 0, 'z': 0},
+    'end': {'x': 0, 'y': gravity, 'z': 0},
+    'radius': 0.5,
+    'fromCap': 1, 'toCap': 2,
+    'color': 'red',
+    'hoverable': True
+})
 
-# Applying Inertia (Shear effect)
 if inertia:
-    view.rotate(45, {'x':1, 'y':1, 'z':0})
+    view.rotate(45, {'x': 1, 'y': 1, 'z': 0})
 
-# Applying Thermal Jitter
-if thermal > 70:
-    view.spin(True)
+view.zoomTo()
+showmol(view, height=600, width=800)
 
-showmol(view, height=600, width=900)
-
-# --- THE VECTOR LOGIC ---
-st.markdown("---")
-st.latex(r"\vec{RA}_{vector} = f(\text{Gravity, Thermal, Circadian})")
+st.write(f"**Current Vector Matrix:** G:{gravity} | T:{thermal} | L:{light} | P:{pressure} | pH:{ph_level}")
