@@ -1,7 +1,2 @@
-streamlit
-stmol
-py3Dmol
-ipywidgets
-ipython_genutils
-pypdb
-biopython
+numpy
+matplotlib
