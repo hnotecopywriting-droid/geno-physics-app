@@ -2,47 +2,70 @@ import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
 
-# Set the page to wide mode for research viewing
-st.set_page_config(layout="wide")
+# 1. PAGE SETUP
+st.set_page_config(layout="wide", page_title="Geno-Physics Lab")
+st.title("RNA/DNA Vector Reaction Research")
+st.write("Visualizing how external environmental vectors cause structural damage and 'Incomplete' DNA states.")
 
-st.title("RNA RA Vector Lab")
-st.write("Adjust the 5 vectors below to see the resultant 3D image.")
+# 2. THE 5 VECTORS (External Influences)
+with st.sidebar:
+    st.header("Vector Experiment Controls")
+    v1 = st.slider('Vector 1: Vertical Pull (Gravity/Tension)', -5.0, 5.0, 0.0)
+    v2 = st.slider('Vector 2: Thermal Expansion (Heat/Swelling)', 0.5, 5.0, 2.0)
+    v3 = st.slider('Vector 3: pH Ionic Charge (Positive/Negative)', -2.0, 2.0, 0.0)
+    v4 = st.slider('Vector 4: Frequency/Vibration', 0.0, 5.0, 1.0)
+    v5 = st.slider('Vector 5: Critical Impact (Toxicity/Carcinogen)', 0.0, 10.0, 0.0)
 
-# 1. THE 5 VECTORS (Control Panel)
-col1, col2 = st.columns([1, 2]) # Split screen: Controls on left, Image on right
+# 3. THE 3D ENGINE
+fig = plt.figure(figsize=(10, 10))
+ax = fig.add_subplot(111, projection='3d')
 
-with col1:
-    st.header("Vector Inputs")
-    v1 = st.slider('Vector 1: Structural (X)', 0.1, 10.0, 5.0)
-    v2 = st.slider('Vector 2: Thermal (Y)', 0.1, 10.0, 5.0)
-    v3 = st.slider('Vector 3: pH (Z)', 0.1, 10.0, 5.0)
-    v4 = st.slider('Vector 4: Detail Density', 5, 50, 25)
-    v5 = st.slider('Vector 5: Magnitude (Alpha)', 0.1, 1.0, 0.7)
+# Building the Helix Core
+z = np.linspace(0, 15, 150)
+theta = (1.0 + (v4 * 0.05)) * z  # Twist influenced by Frequency
 
-# 2. THE 3D IMAGE RENDERING
-with col2:
-    fig = plt.figure(figsize=(10, 8))
-    ax = fig.add_subplot(111, projection='3d')
+# Helix strands react to V2 (Radius) and V3 (Shift)
+x1, y1 = (v2 + v3) * np.cos(theta), (v2 + v3) * np.sin(theta)
+x2, y2 = (v2 + v3) * np.cos(theta + np.pi), (v2 + v3) * np.sin(theta + np.pi)
 
-    # Create the grid based on Vector 4 (Detail)
-    u = np.linspace(0, 2 * np.pi, v4)
-    v = np.linspace(0, np.pi, v4)
+# Applying V1 (Vertical) and V5 (Critical Damage)
+z_distorted = z + (v1 * 0.2)
+noise = np.random.normal(0, v5 * 0.05, 150) # The 'Damage' noise
 
-    # Calculate coordinates using Vectors 1, 2, and 3
-    x = v1 * np.outer(np.cos(u), np.sin(v))
-    y = v2 * np.outer(np.sin(u), np.sin(v))
-    z = v3 * np.outer(np.ones(np.size(u)), np.cos(v))
+# 4. RENDERING THE CORE
+if v5 > 7.0: # Visualizing Critical Damage/Cancerous State
+    ax.scatter(x1 + noise, y1 + noise, z_distorted, color='darkred', s=5, label="Damaged/Incomplete")
+    ax.scatter(x2 + noise, y2 + noise, z_distorted, color='darkred', s=5)
+else:
+    ax.plot(x1 + noise, y1 + noise, z_distorted, color='black', lw=3, alpha=0.8)
+    ax.plot(x2 + noise, y2 + noise, z_distorted, color='blue', lw=3, alpha=0.8)
 
-    # Plot the surface using Vector 5 (Alpha/Transparency)
-    surf = ax.plot_surface(x, y, z, cmap='viridis', alpha=v5, edgecolor='k', linewidth=0.1)
-
-    # Set fixed boundaries so the 'Home' stays stable
-    ax.set_xlim([-10, 10])
-    ax.set_ylim([-10, 10])
-    ax.set_zlim([-10, 10])
+# 5. RENDERING THE HAIRS (The Sensors)
+for i in range(0, len(z), 6):
+    # Hair tips respond to the vectors
+    # They pull away or push in based on the Positive/Negative approach
+    tip_x = x1[i] * (1.5 + v5*0.1) + v3
+    tip_y = y1[i] * (1.5 + v5*0.1)
     
-    ax.set_xlabel('X Vector')
-    ax.set_ylabel('Y Vector')
-    ax.set_zlabel('Z Vector')
+    # Color changes if the impact is 'Bad' (Red) or 'Good' (Cyan)
+    hair_color = 'red' if v5 > 4.0 else 'cyan'
+    
+    ax.plot([x1[i], tip_x], [y1[i], tip_y], [z_distorted[i], z_distorted[i]], 
+            color=hair_color, lw=1, alpha=0.6)
+    
+    # Repeat for second strand
+    tip_x2 = x2[i] * (1.5 + v5*0.1) + v3
+    ax.plot([x2[i], tip_x2], [y2[i], tip_y], [z_distorted[i], z_distorted[i]], 
+            color=hair_color, lw=1, alpha=0.6)
 
-    st.pyplot(fig)
+# Aesthetics
+ax.set_axis_off()
+ax.view_init(elev=20, azim=45)
+st.pyplot(fig)
+
+# 6. RESEARCH DIAGNOSTICS
+st.divider()
+if v5 > 7.0:
+    st.error(f"OBSERVATION: DNA integrity compromised. Vector 5 impact exceeds threshold. Result: Incomplete Record.")
+else:
+    st.success(f"OBSERVATION: Helix stable. Co-reaction within functional limits.")
