@@ -24,7 +24,77 @@ st.title("🔬 RNA RA Vector Research Terminal - Contest Submission")
 st.write("Interacting with the Physical and Non-Physical interface of the Genome. Visualizing how external energies (RA Nodes) influence the RNA structure within a dynamic cellular environment. **Dedicated to the unloseable memory of Dottie.**")
 
 # --- SIDEBAR: THE 5 VECTORS (RA Nodes) & NEW FACTOR SLIDERS ---
-with st.sidebar:
+with st.sidebar:# NEW TABS: Wrap your sim & add science tab
+tab1, tab2 = st.tabs(["🧬 Live Sim", "📚 Science Logic & Research"])
+
+with tab1:
+    # Animation button & params dict (your existing code)
+    if st.button("🔄 Animate Cycle"):
+        st.session_state['anim_time'] += 0.1
+    else:
+        st.session_state['anim_time'] += 0.01
+
+    # ... (ALL your existing params dict, generate_helix_data, apply_physics, gel_container, fig creation, st.plotly_chart)
+
+with tab2:
+    st.markdown("""
+    # 🧬 RNA Stain Dynamics: Clean Logic, Impacts & Research Frontiers
+    
+    ## 1. **What is 'RNA Stain' in DNA Helix Context?**
+    **RNA Stain** refers to **fluorescently stained RNA strands/protrusions** (visualized as glowing 'RA Hairs' – *Ribosomal Antennae* or R-loop extensions) invading or hybridizing with the DNA double helix. 
+    - **Biology Basis**: In cells, RNA (e.g., mRNA, rRNA) forms **R-loops** (RNA:DNA hybrids) during transcription. Stains like SYBR Green, Acridine Orange, or CRISPR-based fluorescent tags light up RNA for microscopy.
+    - **In Our Model**: Orange curling 'hairs' extend from DNA strand 1, mimicking RNA invasion. They curl, vibrate, and deform in a **gel matrix** (agarose for electrophoresis), stained neon for epic viz.
+    - **Logic Flow**: DNA backbone (stable) → RNA hairs attach → External forces deform hairs → Gel constrains/responds → Visual FX show 'strain' (glow intensity, sparks).
+    
+    **Key Equation (Simplified)**:  
+    RNA Deformation = Thermal(Noise) + Gravity(Sag) + Inertia(Lag) × Pressure(Scale) + Sleep/Wake(Oscillate)
+    
+    ## 2. **How Each Factor Impacts RNA (RA Hairs) – Step-by-Step Logic**
+    | Factor | Real-World Analogy | Model Effect on RNA Hairs | Visual Impact in Gel |
+    |--------|--------------------|---------------------------|----------------------|
+    | **🌡️ Thermal Noise** (0-5) | Brownian motion from heat/kT energy. RNA vibrates randomly. | Adds Perlin noise: Hairs jitter/shake. High = frantic curls → hybrid instability. | Sparks intensify; gel 'boils' subtly. **Breaks weak bonds** → RNA detaches? |
+    | **🪨 Gravity** (0-3) | Sedimentation in gels/centrifugation. Pulls heavy RNA down. | Cumulative sag: Hairs droop/bend downward (-Z). High = floppy invasion failure. | Gel warps bottom-heavy; hairs pool at base. **Simulates cell settling**. |
+    | **⚡ Inertia** (0-2) | Momentum from flow/shear (e.g., electrophoresis). RNA lags behind. | Rotational lag: Hairs trail/swing with delay. High = whipping motion. | Gel stretches; sparks trail hairs. **Tests flow resistance**. |
+    | **💧 Pressure** (0.5-2.5) | Hydrostatic/osmotic pressure in crowded cells/gels. Compresses structures. | Radial scale: Hairs squeeze/thicken. High = flattened curls → tighter hybrid. | Gel cylinder shrinks/warps. **Mimics hypertension or gel density**. |
+    | **😴 Sleep/Wake** (0-2) | Circadian/diurnal cycles or stress responses. RNA folds/unfolds. | Sinusoidal waves: Hairs pulse/curl rhythmically. High = active 'antennae' waving. | Gel oscillates faintly. **Models gene activation cycles**. |
+    
+    **Interaction Logic**: Forces **compound** – e.g., High Thermal + Gravity = chaotic droop (RNA ejection from helix). Track via hover: Hairs show live param values!
+    
+    ## 3. **Possible Research Workable Through This 3D Model**
+    This sim bridges **wet-lab visualization** (e.g., confocal microscopy) with **computational physics**. Export data/frames for analysis. Key frontiers:
+    
+    1. **Hypothesis Testing**:
+       - **R-Loop Stability**: Slider combos to find 'ejection thresholds' (e.g., Thermal>3 + Pressure<1 → hybrid melts). Predicts anti-cancer drugs targeting R-loops.
+       - **Electrophoresis Optimization**: Tune Gravity/Inertia for gel runs – simulate band smearing in RNA gels.
+    
+    2. **Educational Tool**:
+       - **Classroom/VR**: Deploy on Streamlit Cloud; students tweak → quiz on impacts. Add `st.download_button` for CSV of hair positions over time.
+    
+    3. **Advanced Simulations**:
+       | Research Area | Model Extension | Outcome |
+       |---------------|-----------------|---------|
+       | **Drug Binding** | Add 'Drug Slider' → hairs straighten. | Screen virtual ligands for RNA stabilization. |
+       | **Viral Invasion** | Animate RNA 'virus hairs'. | COVID mRNA dynamics under stress. |
+       | **Cancer Genomics** | Multi-helix; mutate bases. | Visualize oncogene transcription loops. |
+       | **Cryo-EM Validation** | Export OBJ meshes. | Compare sim to real electron density maps. |
+       | **ML Training** | Log 1000 slider states → dataset. | Train neural net to predict RNA conformations. |
+    
+    4. **Quantitative Outputs** (Add to App):
+       ```python
+       # Example: Compute 'Stability Score'
+       stability = 100 * (1 - params['thermal']/5 - params['gravity']/3 + params['pressure'])
+       st.metric("RNA Hybrid Stability", f"{stability:.0f}%", delta=f"{stability-50:+.0f}")
+       ```
+    
+    **Next Steps for Real Research**:
+    - Integrate PySCF/Quantum for base-pair energies.
+    - Couple to real data: Load PDB RNA structures via BioPython.
+    - Publish: arXiv sim + GitHub → cite as 'Interactive RNA Stain Physics Explorer'.
+    
+    **Sources/Inspo**: R-loop lit (Nature Rev Mol Cell Biol), Brownian dynamics (MD sims like GROMACS), gel electrophoresis physics.
+    
+    Questions? Tweak the model → new insights! 🚀🧬
+    """)
     st.header("🧬 Receptor-Antennae (RA) Node Controls")
     st.write("Adjust the sliders to simulate environmental and internal influences on the RNA. Each node represents a specific external or internal force acting on the genome.")
 
