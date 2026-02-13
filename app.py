@@ -35,12 +35,9 @@ tension = st.sidebar.slider("Helix Tension", 0.0, 1.0, 0.5)
 # --- PHOTO-REAL ENGINE ---
 
 def generate_solid_helix(center, twists, length, color, radius=0.08):
-    """Generates a solid 'Tube' look for the helices."""
     t = np.linspace(0, length, 150)
-    # Physics modifiers
     d_twists = twists + (tension * 5)
     
-    # Create a tube by wrapping a surface around a path
     x = center[0] + radius * np.sin(t * d_twists)
     y = center[1] + radius * np.cos(t * d_twists)
     z = center[2] + t - (gravity * 1.5)
@@ -48,13 +45,12 @@ def generate_solid_helix(center, twists, length, color, radius=0.08):
     return go.Scatter3d(
         x=x, y=y, z=z,
         mode='lines',
-        line=dict(color=color, width=12), # Thick width for solid feel
+        line=dict(color=color, width=12), 
         opacity=1.0,
         name="RA Helix Strand"
     )
 
 def generate_protein_bonds(center, twists, length):
-    """Adds those tiny white 'ladder rungs' across the helix."""
     t = np.linspace(0, length, 40)
     d_twists = twists + (tension * 5)
     radius = 0.08
@@ -63,7 +59,6 @@ def generate_protein_bonds(center, twists, length):
     for i in range(len(t)):
         x1 = center[0] + radius * np.sin(t[i] * d_twists)
         y1 = center[1] + radius * np.cos(t[i] * d_twists)
-        # Offset for second side
         x2 = center[0] + radius * np.sin(t[i] * d_twists + np.pi/2)
         y2 = center[1] + radius * np.cos(t[i] * d_twists + np.pi/2)
         z = center[2] + t[i] - (gravity * 1.5)
@@ -76,14 +71,11 @@ def generate_protein_bonds(center, twists, length):
                         line=dict(color='white', width=3), opacity=0.6, showlegend=False)
 
 def generate_ribosome_body(center, size, color1, color2):
-    """Generates a lumpy, two-part protein mass (Large/Small subunits)."""
-    # Small Subunit
     u, v = np.mgrid[0:2*np.pi:30j, 0:np.pi:15j]
     x_s = (size*0.7) * np.cos(u) * np.sin(v) + center[0]
     y_s = (size*0.9) * np.sin(u) * np.sin(v) + center[1]
     z_s = (size*0.6) * np.cos(v) + center[2] - 0.3 - (gravity * 0.5)
     
-    # Large Subunit (Offset slightly)
     x_l = (size*1.1) * np.cos(u) * np.sin(v) + center[0]
     y_l = (size*1.0) * np.sin(u) * np.sin(v) + center[1]
     z_l = (size*0.8) * np.cos(v) + center[2] + 0.3 - (gravity * 0.5)
@@ -98,28 +90,22 @@ st.title("🧬 RA-RNP Photo-Realistic Molecular Architecture")
 
 fig = go.Figure()
 
-# 1. THE PROTEIN BODY (Orange/Gold Solid Subunits)
-# 
+# 1. THE PROTEIN BODY
 fig.add_traces(generate_ribosome_body([0,0,0], 1.2, "#ff8c00", "#cc5500"))
 
-# 2. THE THICK HELICAL STRANDS (Solid Ribbons)
-# 
-# Purple mRNA
+# 2. THE THICK HELICAL STRANDS
 fig.add_trace(generate_solid_helix([0,0,-2.5], 14, 5, "#4b0082"))
 fig.add_trace(generate_protein_bonds([0,0,-2.5], 14, 5))
 
-# Red tRNA
 fig.add_trace(generate_solid_helix([-0.4, -0.4, -1], 10, 3.5, "#b22222"))
 fig.add_trace(generate_protein_bonds([-0.4, -0.4, -1], 10, 3.5))
 
 # 3. OUTER CELL BOUNDARY
-# 
-
-[Image of the fluid mosaic model of a cell membrane]
-
-u, v = np.mgrid[0:2*np.pi:20j, 0:np.pi:10j]
+u_bound, v_bound = np.mgrid[0:2*np.pi:20j, 0:np.pi:10j]
 fig.add_trace(go.Mesh3d(
-    x=2.5 * np.cos(u).flatten(), y=2.5 * np.sin(u).flatten(), z=(2.5 * np.cos(v).flatten() - gravity),
+    x=2.5 * np.cos(u_bound).flatten(), 
+    y=2.5 * np.sin(u_bound).flatten(), 
+    z=(2.5 * np.cos(v_bound).flatten() - gravity),
     color='skyblue', opacity=0.1, name="Cell Boundary"
 ))
 
