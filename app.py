@@ -5,7 +5,7 @@ import plotly.graph_objects as go
 # --- PAGE CONFIG ---
 st.set_page_config(page_title="RA Fibrogicus RNP Model", layout="wide", initial_sidebar_state="expanded")
 
-# --- CUSTOM CSS: MATCHING THE DASHBOARD STYLE ---
+# --- CUSTOM CSS ---
 st.markdown("""
     <style>
     .main { background-color: #0b0e14; }
@@ -37,33 +37,32 @@ density = st.sidebar.slider("Core Density", 0.1, 2.0, 1.20)
 # --- ORGANIC ARCHITECTURE ENGINES ---
 
 def generate_bonded_fibers(center, count, color, name, length=120):
-    """Creates the tangled, 'ladder-rung' fibers exactly like the picture."""
+    """Creates the tangled, 'ladder-rung' fibers for the model."""
     traces = []
     for _ in range(count):
         steps = length
-        # Create organic path
         x = np.cumsum(np.random.normal(0, 0.15, steps)) + center[0]
         y = np.cumsum(np.random.normal(0, 0.15, steps)) + center[1]
         z = np.cumsum(np.random.normal(0, 0.15, steps)) - (gravity * 2) + center[2]
         
-        # Add the main thick strand
+        # Primary Strand
         traces.append(go.Scatter3d(x=x, y=y, z=z, mode='lines', 
                                    line=dict(color=color, width=7), opacity=0.8, showlegend=False))
         
-        # Add the white bonding rungs (the 'latters')
+        # Cross-Connector Rungs (The "Little Bars")
         bx, by, bz = [], [], []
         for i in range(0, steps - 5, 6):
-            # Tightened offsets to look like real protein connectors
-            bx.extend([x[i], x[i]+0.08, None])
-            by.extend([y[i], y[i]+0.08, None])
+            # Creates a tiny horizontal bar at each interval
+            bx.extend([x[i], x[i]+0.09, None])
+            by.extend([y[i], y[i]+0.09, None])
             bz.extend([z[i], z[i], None])
             
         traces.append(go.Scatter3d(x=bx, y=by, z=bz, mode='lines', 
-                                   line=dict(color='white', width=2.5), opacity=0.5, showlegend=False))
+                                   line=dict(color='white', width=3), opacity=0.5, showlegend=False))
     return traces
 
 def generate_pebbled_core(center, size):
-    """The massive pebbled orange core glob."""
+    """The pebbled orange core glob representing the Ribosome."""
     n = int(1200 * density)
     phi = np.random.uniform(0, 2*np.pi, n)
     costheta = np.random.uniform(-1, 1, n)
@@ -82,14 +81,14 @@ def generate_pebbled_core(center, size):
 
 # --- MAIN UI DISPLAY ---
 st.title("🧬 RA Fibrogicus Biological Architecture")
-st.markdown("### *Systems Counseling Approach to Genetic Resilience*")
+st.markdown("### *HBB Systems Counseling Approach to Tangled Genetic Resilience*")
 
 col_viz, col_data = st.columns([3, 1])
 
 with col_viz:
     fig = go.Figure()
 
-    # 1. THE PROTECTIVE CELL SHELL (Glowing Mesh)
+    # 1. THE PROTECTIVE CELL SHELL
     u, v = np.mgrid[0:2*np.pi:40j, 0:np.pi:20j]
     xs = 2.8 * np.cos(u) * np.sin(v)
     ys = 2.8 * np.sin(u) * np.sin(v)
@@ -119,8 +118,6 @@ with col_data:
     
     st.markdown("---")
     st.write("**Counseling Note:**")
-    st.info("The tangled fibers show the complexity of the human experience. The white 'bars' represent the protein bonds—the values that keep us from unraveling under Thermal Stress.")
+    st.info("This model shows how protein bonds hold genetic strands together like daily habits under Thermal Stress.")
     
     st.success("✅ Architecture Stable")
-
-st.caption("RA-RNP Fibrogicus Rendering | 175,000 Residue Simulation | Stanford 2026")
