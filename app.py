@@ -1,4 +1,4 @@
-iimport streamlit as st
+import streamlit as st
 import numpy as np
 import plotly.graph_objects as go
 
@@ -18,7 +18,6 @@ st.markdown("""
 st.sidebar.title("🎮 RA Control Matrix")
 
 if st.sidebar.button("🔄 Reset to Natural Equilibrium"):
-    # This triggers a rerun with default values
     st.rerun()
 
 st.sidebar.subheader("🌍 External Influences")
@@ -30,7 +29,6 @@ x_bio = st.sidebar.slider("Biodemographic (X_bio)", 0.0, 1.0, 0.20)
 
 st.sidebar.markdown("---")
 st.sidebar.subheader("🧬 Internal RA Nodes (100% Reaction)")
-# RA Nodes react to the sliders above based on your Systems Counseling rule
 ra1 = st.sidebar.slider("RA Node 1 (Structure)", 0.0, 1.0, p_mech)
 ra2 = st.sidebar.slider("RA Node 2 (Energy)", 0.0, 1.0, t_rad)
 ra3 = st.sidebar.slider("RA Node 3 (Frequency)", 0.0, 1.0, v_res)
@@ -39,13 +37,9 @@ ra5 = st.sidebar.slider("RA Node 5 (Biology)", 0.0, 1.0, x_bio)
 
 # --- HELIX GENERATION ENGINE ---
 def generate_helix_trace(center, length, radius, base_twists, color, name, is_double=False):
-    """Generates complex helix geometry influenced by slider values."""
     t = np.linspace(0, length, 150)
-    
-    # MATH: Pressure tightens the coil, Thermal expands the width
     dynamic_twists = base_twists + (p_mech * 8) 
     dynamic_radius = radius + (t_rad * 0.4)
-    # Jitter effect from Vibrational Resonance
     vibe = np.sin(t * 20) * (v_res * 0.05)
     
     traces = []
@@ -63,8 +57,8 @@ def generate_helix_trace(center, length, radius, base_twists, color, name, is_do
         name=name
     ))
     
-    # Strand B (For Double Helix)
     if is_double:
+        # Strand B (For Double Helix)
         x2 = center[0] + (dynamic_radius + vibe) * np.sin(t * dynamic_twists + np.pi)
         y2 = center[1] + (dynamic_radius + vibe) * np.cos(t * dynamic_twists + np.pi)
         z2 = z1
@@ -88,20 +82,13 @@ with col_viz:
     fig = go.Figure()
 
     # 1. THE OUTER GHOST SHELL (Blue Master Helix)
-    # This represents the large-scale RNA structure
     fig.add_traces(generate_helix_trace([0,0,-2], 6, 1.5, 2, "rgba(0, 242, 255, 0.15)", "RA Outer Framework", True))
 
-    # 2. INTERNAL RA HELIX CLUSTERS (The 'Beaded Strains')
-    # Gold rRA - High density twists
+    # 2. INTERNAL RA HELIX CLUSTERS
     fig.add_traces(generate_helix_trace([0.4, 0.4, -0.5], 2.5, 0.5, 10, "#ffcc00", "rRA Helix (Gold)"))
-    
-    # Red tRA - Medium density
     fig.add_traces(generate_helix_trace([-0.5, -0.2, 0.5], 2.0, 0.4, 6, "#ff3333", "tRA Helix (Red)"))
-    
-    # Purple snRA - Tight, short twists
     fig.add_traces(generate_helix_trace([0.1, -0.6, -1.5], 1.8, 0.3, 12, "#aa00ff", "snRA Helix (Purple)"))
 
-    # 3. GLOBAL PLOT STYLING
     fig.update_layout(
         template="plotly_dark",
         height=850,
@@ -117,8 +104,6 @@ with col_viz:
 
 with col_data:
     st.subheader("🔍 Helix Inspector")
-    
-    # Pearson accuracy logic based on the "Balance" of the 10 sliders
     accuracy = 1.0 - (abs(p_mech - t_rad) * 0.1)
     st.metric("Pearson Alignment Score", f"{accuracy:.4f}")
     
@@ -127,13 +112,7 @@ with col_data:
     st.write(f"- Twist Frequency: {2 + (p_mech * 8):.1f} cycles")
     st.write(f"- Vibrational Jitter: {v_res * 100:.1f} MHz")
     
-    
-
-[Image of DNA double helix]
-
-    
-
-    st.info("**Counseling Selling Point:** This model visualizes the 'Double Helix' of human resilience. When external pressure (P_mech) increases, the core RA nodes tighten to protect the system's integrity.")
+    st.info("**Counseling Selling Point:** This model visualizes the 'Double Helix' of human resilience. When external pressure increases, the core RA nodes tighten to protect the system's integrity.")
     
     st.success("✅ Systems Matrix Stable")
 
