@@ -53,13 +53,13 @@ def generate_bonded_fibers(center, count, color, name, length=120):
         # Add the white bonding rungs (the 'latters')
         bx, by, bz = [], [], []
         for i in range(0, steps - 5, 6):
-            # Offsets to create the 'bar' effect
-            bx.extend([x[i], x[i]+0.1, None])
-            by.extend([y[i], y[i]+0.1, None])
+            # Tightened offsets to look like real protein connectors
+            bx.extend([x[i], x[i]+0.08, None])
+            by.extend([y[i], y[i]+0.08, None])
             bz.extend([z[i], z[i], None])
             
         traces.append(go.Scatter3d(x=bx, y=by, z=bz, mode='lines', 
-                                   line=dict(color='white', width=2), opacity=0.4, showlegend=False))
+                                   line=dict(color='white', width=2.5), opacity=0.5, showlegend=False))
     return traces
 
 def generate_pebbled_core(center, size):
