@@ -65,4 +65,87 @@ matrix_intensity = calculate_matrix_intensity(p_mech, [t_rad, v_res, c_temp, x_b
 
 # --- MAIN LAYOUT ---
 st.title("🧬 RNA-RNP 175,000 Influence Matrix")
-st
+st.markdown("### *Predicting Globular Folding via Environmental Interaction*")
+
+col_main, col_sub = st.columns([2, 1])
+
+with col_main:
+    st.subheader("🌐 3D Structural Render (Rockefeller Model)")
+    
+    # GENERATE GLOBULE (Simplified representation of 175k residues)
+    n_points = 3500 
+    indices = np.arange(n_points)
+    # Fibonacci Sphere mapping for a globular "bunched" look
+    phi = np.arccos(1 - 2*indices/n_points)
+    theta = np.pi * (1 + 5**0.5) * indices
+
+    # APPLY SLIDER LOGIC TO COORDINATES
+    # P_mech compresses radius, T_rad causes vibration/expansion
+    base_radius = (1.5 - (p_mech * 0.7)) 
+    vibration = np.sin(theta * 10) * (v_res * 0.2)
+    radius = base_radius + vibration
+    
+    x = radius * np.cos(theta) * np.sin(phi)
+    y = radius * np.sin(theta) * np.sin(phi)
+    z = radius * np.cos(phi) + (t_rad * 0.5) # Heat makes it "rise"
+
+    # BUILD 3D PLOT
+    fig = go.Figure(data=[go.Scatter3d(
+        x=x, y=y, z=z,
+        mode='markers',
+        marker=dict(
+            size=3,
+            color=z, # Height-based coloring
+            colorscale='Hot' if t_rad > 0.5 else 'Viridis',
+            opacity=0.7
+        )
+    )])
+
+    fig.update_layout(
+        template="plotly_dark",
+        height=700,
+        margin=dict(l=0, r=0, b=0, t=0),
+        scene=dict(
+            xaxis=dict(visible=False),
+            yaxis=dict(visible=False),
+            zaxis=dict(visible=False)
+        )
+    )
+    st.plotly_chart(fig, use_container_width=True)
+
+with col_sub:
+    st.subheader("🔍 Part Inspector")
+    selection = st.selectbox("Pick a component to inspect:", list(parts_info.keys()))
+    
+    # INFO DISPLAY
+    st.markdown(f"**Description:** {parts_info[selection]['desc']}")
+    st.info(f"**Scientific Context:** {parts_info[selection]['fact']}")
+    
+    # MINI INTERACTIVE MODEL FOR SUB-PAGE
+    st.markdown("---")
+    st.write(f"**Dimensional Profile: {selection}**")
+    
+    # Create a small loop or helix depending on selection
+    t_mini = np.linspace(0, 10, 100)
+    if "Loop" in selection:
+        xm, ym, zm = np.sin(t_mini), np.cos(t_mini), np.sin(t_mini/2)
+    else:
+        xm, ym, zm = np.cos(t_mini), np.sin(t_mini), t_mini/5
+
+    mini_fig = go.Figure(data=[go.Scatter3d(x=xm, y=ym, z=zm, mode='lines', line=dict(color='#00f2ff', width=6))])
+    mini_fig.update_layout(template="plotly_dark", height=300, margin=dict(l=0,r=0,b=0,t=0), showlegend=False)
+    st.plotly_chart(mini_fig, use_container_width=True)
+
+    # REACTION METRIC
+    st.metric(label="Matrix Reaction Intensity", value=f"{matrix_intensity:.2%}")
+
+# --- FOOTER: THE COUNSELING SELLING POINT ---
+st.markdown("---")
+st.subheader("🧠 Counseling & Systems Theory Application")
+st.write(f"""
+    **Current State Analysis:** This model demonstrates that a high value of **{selection}** under a Mechanical Pressure of **{p_mech:.2f}** results in a { "dense" if p_mech > 0.5 else "flexible" } structural alignment. 
+    In counseling, this mirrors how individuals compact their internal 'blueprints' (DNA/RNA) 
+    to survive high-pressure environments. Structural integrity is a negotiation with the outside world.
+""")
+
+st.caption("Developed for Stanford RNA 3D Folding Challenge Part 2 | Model: Rockefeller Rough RNP")
