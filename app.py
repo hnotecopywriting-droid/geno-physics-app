@@ -2,81 +2,67 @@ import streamlit as st
 import numpy as np
 import plotly.graph_objects as go
 
-# --- PAGE CONFIG ---
-st.set_page_config(page_title="RNA Influence Matrix", layout="wide")
+# --- PAGE CONFIGURATION ---
+st.set_page_config(page_title="RNA Influence Matrix", layout="wide", initial_sidebar_state="expanded")
 
+# --- CUSTOM CSS FOR "BAD ASS" STYLING ---
+st.markdown("""
+    <style>
+    .main { background-color: #0e1117; }
+    .stMarkdown h1, h2, h3 { color: #00f2ff; }
+    .stInfo { background-color: #1e2a3a; border-left: 5px solid #00f2ff; }
+    </style>
+    """, unsafe_content_usage=True)
+
+# --- THE DATA DICTIONARY (Pearson & RNA Info) ---
+parts_info = {
+    "Hairpin Loop": {
+        "desc": "A single strand of RNA that folds back upon itself. Critical for gene expression.",
+        "fact": "As seen in the Wikipedia documentation, these loops provide structural stability."
+    },
+    "Ribose Sugar": {
+        "desc": "The 'R' in RNA. Contains a 2'-hydroxyl group that makes it chemically more reactive than DNA.",
+        "fact": "This reactivity allows RNA to act as an enzyme, not just an information carrier."
+    },
+    "Uracil Base": {
+        "desc": "RNA’s unique base. Replaces Thymine found in DNA.",
+        "fact": "Pairs with Adenine (A) via two hydrogen bonds. Key for the 'RNA World' theory."
+    },
+    "Pearson Alignment": {
+        "desc": "The Pearson Correlation Coefficient measures spatial accuracy.",
+        "fact": "In our model, this tracks how well external pressure aligns with internal structural responses."
+    }
+}
+
+# --- SIDEBAR: THE 10-SLIDER CONTROL MATRIX ---
+st.sidebar.title("🎮 Control Matrix")
+st.sidebar.markdown("---")
+
+st.sidebar.subheader("🌍 External Influences (Inputs)")
+p_mech = st.sidebar.slider("Mechanical Pressure (P_mech)", 0.0, 1.0, 0.20)
+t_rad = st.sidebar.slider("Thermal Stress (T_rad)", 0.0, 1.0, 0.35)
+v_res = st.sidebar.slider("Vibrational Res (V_res)", 0.0, 1.0, 0.10)
+c_temp = st.sidebar.slider("Temporal Flow (C_temp)", 0.0, 1.0, 0.50)
+x_bio = st.sidebar.slider("Biodemographic (X_bio)", 0.0, 1.0, 0.15)
+
+st.sidebar.markdown("---")
+st.sidebar.subheader("🧬 Internal RA Nodes (Responses)")
+# In the 5x5 Matrix, these are mapped to the influencers above
+ra1 = st.sidebar.slider("RA Node 1 (Linked: P_mech)", 0.0, 1.0, p_mech)
+ra2 = st.sidebar.slider("RA Node 2 (Linked: T_rad)", 0.0, 1.0, t_rad)
+ra3 = st.sidebar.slider("RA Node 3 (Linked: V_res)", 0.0, 1.0, v_res)
+ra4 = st.sidebar.slider("RA Node 4 (Linked: C_temp)", 0.0, 1.0, c_temp)
+ra5 = st.sidebar.slider("RA Node 5 (Linked: X_bio)", 0.0, 1.0, x_bio)
+
+# --- MATH: THE 100% REACTION LOGIC ---
+def calculate_matrix_intensity(primary, others):
+    # Rule: 100% reaction to primary slider + partial from others
+    weights = 0.25 # "Weighted Sympathy"
+    intensity = (primary * 1.0) + (sum(others) * weights)
+    return min(intensity, 1.0) # Cap at 1.0 for UI
+
+matrix_intensity = calculate_matrix_intensity(p_mech, [t_rad, v_res, c_temp, x_bio])
+
+# --- MAIN LAYOUT ---
 st.title("🧬 RNA-RNP 175,000 Influence Matrix")
-st.markdown("### *Systems Counseling Approach to RNA Folding Architecture*")
-
-# --- SIDEBAR: THE 10-SLIDER SYSTEM ---
-st.sidebar.header("🌍 External Influences (Inputs)")
-p_mech = st.sidebar.slider("Mechanical Pressure (P_mech)", 0.0, 1.0, 0.2)
-t_rad = st.sidebar.slider("Thermal/Radiative (T_rad)", 0.0, 1.0, 0.3)
-v_res = st.sidebar.slider("Vibrational Resonance (V_res)", 0.0, 1.0, 0.1)
-c_temp = st.sidebar.slider("Temporal/Circadian (C_temp)", 0.0, 1.0, 0.5)
-x_bio = st.sidebar.slider("Biodemographic/Unknown (X_bio)", 0.0, 1.0, 0.1)
-
-st.sidebar.header("🧬 Internal RA Nodes (Responses)")
-ra1 = st.sidebar.slider("RA Node 1 (Primary: Pressure)", 0.0, 1.0, 0.0)
-ra2 = st.sidebar.slider("RA Node 2 (Primary: Thermal)", 0.0, 1.0, 0.0)
-ra3 = st.sidebar.slider("RA Node 3 (Primary: Vibration)", 0.0, 1.0, 0.0)
-e1 = st.sidebar.slider("Emergent Node 4", 0.0, 1.0, 0.0)
-e2 = st.sidebar.slider("Emergent Node 5", 0.0, 1.0, 0.0)
-
-# --- THE MATH: 100% REACTION RULE ---
-# Calculating weighted response based on the "Outer" influences
-# Filament 1 is 100% linked to Mechanical Pressure, etc.
-weights = {'primary': 1.0, 'secondary': 0.25}
-
-def calculate_response(primary_val, others):
-    # R_n = (I_x * 1.0) + Σ(I_other * w)
-    return (primary_val * weights['primary']) + (sum(others) * weights['secondary'])
-
-# Updating response values based on matrix logic
-res_ra1 = calculate_response(p_mech, [t_rad, v_res, c_temp, x_bio])
-res_ra2 = calculate_response(t_rad, [p_mech, v_res, c_temp, x_bio])
-
-# --- GENERATING THE 175k GLOBULE ---
-@st.cache_data
-def generate_base_globule(n_points=5000): # Using 5k for smooth web rendering, scaling to 175k for final
-    # Creating a "Rockefeller" style bunching effect
-    t = np.linspace(0, 50, n_points)
-    x = t * np.sin(t)
-    y = t * np.cos(t)
-    z = np.linspace(0, 20, n_points)
-    return x, y, z
-
-x_base, y_base, z_base = generate_base_globule()
-
-# Apply the "100% Reaction" to the 3D coordinates (Visual Fold)
-# As Pressure (p_mech) increases, the globule "bunches" tighter (multiplied by 1-p_mech)
-fold_factor = 1.0 - (p_mech * 0.5)
-x_folded = x_base * fold_factor
-y_folded = y_base * fold_factor
-z_folded = z_base + (t_rad * 10) # Heat makes it "rise" or expand vertically
-
-# --- 3D VISUALIZATION ---
-fig = go.Figure(data=[go.Scatter3d(
-    x=x_folded, y=y_folded, z=z_folded,
-    mode='lines',
-    line=dict(
-        color=z_folded, # Color changes based on "energy/thermal" height
-        colorscale='Viridis',
-        width=4
-    )
-)])
-
-fig.update_layout(
-    margin=dict(l=0, r=0, b=0, t=0),
-    scene=dict(
-        xaxis_title='Spatial X',
-        yaxis_title='Spatial Y',
-        zaxis_title='Dimensional Fold (Z)'
-    ),
-    template="plotly_dark"
-)
-
-st.plotly_chart(fig, use_container_width=True)
-
-# --- COUNSELING INSIGHT PANEL ---
-st.info(f"**Counseling Insight:** The current structural alignment shows a reaction intensity of {res_ra1:.2f} to external pressure. This represents a highly adaptive state.")
+st
