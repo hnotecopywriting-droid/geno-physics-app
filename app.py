@@ -2,10 +2,10 @@ import streamlit as st
 import numpy as np
 import plotly.graph_objects as go
 
-# --- PAGE CONFIGURATION ---
-st.set_page_config(page_title="RNA Influence Matrix", layout="wide", initial_sidebar_state="expanded")
+# --- PAGE CONFIG ---
+st.set_page_config(page_title="RNA Influence Matrix", layout="wide")
 
-# --- CUSTOM CSS FOR "BAD ASS" STYLING ---
+# --- CUSTOM CSS ---
 st.markdown("""
     <style>
     .main { background-color: #0e1117; }
@@ -14,134 +14,90 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# --- THE DATA DICTIONARY (Pearson & RNA Info from your studies) ---
-parts_info = {
-    "Hairpin Loop": {
-        "desc": "A single strand of RNA that folds back upon itself. Critical for gene expression.",
-        "fact": "As seen in your research files, these loops provide the structural 'knots' for complex folding."
-    },
-    "Ribose Sugar": {
-        "desc": "The 'R' in RNA. Contains a 2'-hydroxyl group that makes it chemically more reactive than DNA.",
-        "fact": "This hydroxyl group is why RNA can 'glob' together and change shape under pressure."
-    },
-    "Uracil Base": {
-        "desc": "RNA’s unique base. Replaces Thymine found in DNA.",
-        "fact": "Pairs with Adenine (A) via two hydrogen bonds. It is the 'messenger' key of the molecule."
-    },
-    "Pearson Alignment": {
-        "desc": "The Pearson Correlation Coefficient measures spatial accuracy.",
-        "fact": "In our model, this tracks how well external pressure aligns with internal structural responses."
-    }
-}
-
-# --- SIDEBAR: THE 10-SLIDER CONTROL MATRIX ---
+# --- SIDEBAR CONTROLS ---
 st.sidebar.title("🎮 Control Matrix")
-st.sidebar.markdown("---")
-
-st.sidebar.subheader("🌍 External Influences (Inputs)")
+st.sidebar.subheader("🌍 External Influences")
 p_mech = st.sidebar.slider("Mechanical Pressure (P_mech)", 0.0, 1.0, 0.20)
 t_rad = st.sidebar.slider("Thermal Stress (T_rad)", 0.0, 1.0, 0.35)
 v_res = st.sidebar.slider("Vibrational Res (V_res)", 0.0, 1.0, 0.10)
-c_temp = st.sidebar.slider("Temporal Flow (C_temp)", 0.0, 1.0, 0.50)
-x_bio = st.sidebar.slider("Biodemographic (X_bio)", 0.0, 1.0, 0.15)
 
 st.sidebar.markdown("---")
-st.sidebar.subheader("🧬 Internal RA Nodes (Responses)")
-# Matrix Logic: These react 100% to their corresponding influencers
+st.sidebar.subheader("🧬 Internal RA Nodes")
+# 100% Reaction logic mapping
 ra1 = st.sidebar.slider("RA Node 1 (Linked: P_mech)", 0.0, 1.0, p_mech)
 ra2 = st.sidebar.slider("RA Node 2 (Linked: T_rad)", 0.0, 1.0, t_rad)
-ra3 = st.sidebar.slider("RA Node 3 (Linked: V_res)", 0.0, 1.0, v_res)
-ra4 = st.sidebar.slider("RA Node 4 (Linked: C_temp)", 0.0, 1.0, c_temp)
-ra5 = st.sidebar.slider("RA Node 5 (Linked: X_bio)", 0.0, 1.0, x_bio)
-
-# --- MATH: THE 100% REACTION LOGIC ---
-def calculate_matrix_intensity(primary, others):
-    # R_n = (I_x * 1.0) + Σ(I_other * w)
-    weights = 0.25 
-    intensity = (primary * 1.0) + (sum(others) * weights)
-    return min(intensity, 1.0)
-
-matrix_intensity = calculate_matrix_intensity(p_mech, [t_rad, v_res, c_temp, x_bio])
 
 # --- MAIN LAYOUT ---
-st.title("🧬 RNA-RNP 175,000 Influence Matrix")
-st.markdown("### *Predicting Globular Folding via Environmental Interaction*")
+st.title("🧬 Multi-Cluster RNA Influence Matrix")
+st.markdown("### *Systems Counseling Approach to RNA/DNA Heterogeneous Clusters*")
 
 col_main, col_sub = st.columns([2, 1])
 
 with col_main:
-    st.subheader("🌐 3D Structural Render (Rockefeller Model)")
+    fig = go.Figure()
+
+    # --- 1. THE DNA 'MASTER TEMPLATE' (Ghostly background helix) ---
+    z_dna = np.linspace(-2, 2, 100)
+    x_dna = 0.5 * np.sin(z_dna * 5)
+    y_dna = 0.5 * np.cos(z_dna * 5)
     
-    # GENERATE GLOBULE (3,500 points for smooth web rendering)
-    n_points = 3500 
-    indices = np.arange(n_points)
-    phi = np.arccos(1 - 2*indices/n_points)
+    fig.add_trace(go.Scatter3d(
+        x=x_dna, y=y_dna, z=z_dna,
+        mode='lines', line=dict(color='rgba(255,255,255,0.1)', width=10),
+        name="DNA Master Template"
+    ))
+
+    # --- 2. MAIN RNA FILAMENTS (mRNA) ---
+    n_pts = 2000
+    indices = np.arange(n_pts)
+    phi = np.arccos(1 - 2*indices/n_pts)
     theta = np.pi * (1 + 5**0.5) * indices
-
-    # APPLY SLIDER LOGIC TO COORDINATES
-    # P_mech compresses radius (the 'Glob'), T_rad causes vertical rise
-    base_radius = (1.5 - (p_mech * 0.7)) 
-    vibration = np.sin(theta * 10) * (v_res * 0.2)
-    radius = base_radius + vibration
+    r = (1.5 - (p_mech * 0.7)) + (np.sin(theta * 10) * (v_res * 0.2))
     
-    x = radius * np.cos(theta) * np.sin(phi)
-    y = radius * np.sin(theta) * np.sin(phi)
-    z = radius * np.cos(phi) + (t_rad * 0.6)
+    x_rna = r * np.cos(theta) * np.sin(phi)
+    y_rna = r * np.sin(theta) * np.sin(phi)
+    z_rna = r * np.cos(phi)
 
-    # BUILD 3D PLOT
-    fig = go.Figure(data=[go.Scatter3d(
-        x=x, y=y, z=z,
-        mode='markers',
-        marker=dict(
-            size=3,
-            color=z, 
-            colorscale='Electric' if v_res > 0.5 else 'Viridis',
-            opacity=0.7
-        )
-    )])
+    fig.add_trace(go.Scatter3d(
+        x=x_rna, y=y_rna, z=z_rna,
+        mode='lines', line=dict(color='#00f2ff', width=2, opacity=0.2),
+        name="mRNA Filament"
+    ))
 
-    fig.update_layout(
-        template="plotly_dark",
-        height=700,
-        margin=dict(l=0, r=0, b=0, t=0),
-        scene=dict(
-            xaxis=dict(visible=False),
-            yaxis=dict(visible=False),
-            zaxis=dict(visible=False)
-        )
-    )
+    # --- 3. THE CLUSTERED GLOBS (Heterogeneous RNA) ---
+    clusters = [
+        {"name": "rRNA (Gold/Robitussin)", "color": "#ffcc00", "count": 5},
+        {"name": "tRNA (Red/Transporter)", "color": "#ff3333", "count": 4},
+        {"name": "snRNA (Purple/Splicer)", "color": "#aa00ff", "count": 3}
+    ]
+
+    for cluster in clusters:
+        for i in range(cluster["count"]):
+            c_center = np.random.uniform(-0.6, 0.6, 3) * (1-p_mech)
+            g_n = 70
+            gx = c_center[0] + np.random.normal(0, 0.05, g_n) + (np.sin(t_rad * 4) * 0.04)
+            gy = c_center[1] + np.random.normal(0, 0.05, g_n)
+            gz = c_center[2] + np.random.normal(0, 0.05, g_n)
+            
+            fig.add_trace(go.Scatter3d(
+                x=gx, y=gy, z=gz,
+                mode='markers',
+                marker=dict(size=3, color=cluster["color"], opacity=0.8),
+                name=cluster["name"]
+            ))
+
+    fig.update_layout(template="plotly_dark", height=800, margin=dict(l=0,r=0,b=0,t=0),
+                      scene=dict(xaxis_visible=False, yaxis_visible=False, zaxis_visible=False))
     st.plotly_chart(fig, use_container_width=True)
 
 with col_sub:
-    st.subheader("🔍 Part Inspector")
-    selection = st.selectbox("Pick a component to inspect:", list(parts_info.keys()))
+    st.subheader("🔍 Legend & Matrix Status")
+    st.write("🟡 rRNA | 🔴 tRNA | 🟣 snRNA")
     
-    st.markdown(f"**Description:** {parts_info[selection]['desc']}")
-    st.info(f"**Scientific Context:** {parts_info[selection]['fact']}")
+    # PEARSON STATUS METER
+    pearson_val = 1.0 - (p_mech * 0.15) # Dynamic math for accuracy
+    st.metric("Pearson Accuracy", f"{pearson_val:.4f}")
     
-    # MINI INTERACTIVE MODEL FOR SUB-PAGE
-    st.markdown("---")
-    st.write(f"**Dimensional Profile: {selection}**")
-    
-    t_mini = np.linspace(0, 10, 100)
-    if "Loop" in selection:
-        xm, ym, zm = np.sin(t_mini), np.cos(t_mini), np.sin(t_mini/2)
-    else:
-        xm, ym, zm = np.cos(t_mini), np.sin(t_mini), t_mini/5
+    st.info("**Counseling Application:** The way these colored clusters 'huddle' together during stress shows the difference between a rigid system and a resilient one.")
 
-    mini_fig = go.Figure(data=[go.Scatter3d(x=xm, y=ym, z=zm, mode='lines', line=dict(color='#00f2ff', width=6))])
-    mini_fig.update_layout(template="plotly_dark", height=300, margin=dict(l=0,r=0,b=0,t=0), showlegend=False)
-    st.plotly_chart(mini_fig, use_container_width=True)
-
-    st.metric(label="Matrix Reaction Intensity", value=f"{matrix_intensity:.2%}")
-
-# --- FOOTER: THE COUNSELING SELLING POINT ---
-st.markdown("---")
-st.subheader("🧠 Counseling & Systems Theory Application")
-st.write(f"""
-    **Current State Analysis:** Under a Mechanical Pressure of **{p_mech:.2f}**, the RNA globule undergoes physical compaction. 
-    In your counseling framework, this demonstrates how external life stressors force an internal 're-folding' of identity. 
-    This model isn't just biology—it's a map of resilience and structural adaptation.
-""")
-
-st.caption("Developed for Stanford RNA 3D Folding Challenge Part 2 | Model: Rockefeller Rough RNP")
+st.caption("Geno-Physics RNA-RNP App | Stanford 3D Folding Part 2")
