@@ -3,7 +3,7 @@ import numpy as np
 import plotly.graph_objects as go
 
 # --- PAGE CONFIG ---
-st.set_page_config(page_title="RA Deep Helix RNP", layout="wide", initial_sidebar_state="expanded")
+st.set_page_config(page_title="RA Fibrogicus Bonded", layout="wide", initial_sidebar_state="expanded")
 
 # --- CUSTOM CSS ---
 st.markdown("""
@@ -30,107 +30,91 @@ st.sidebar.subheader("🌍 Environmental Influence")
 p_mech = st.sidebar.slider("Mechanical Pressure", 0.0, 1.0, 0.25)
 v_res = st.sidebar.slider("Vibrational Resonance", 0.0, 1.0, 0.15)
 
-# --- ADVANCED HELIX & CONNECTOR GENERATOR ---
+# --- ORGANIC BONDED FIBER GENERATOR ---
 
-def generate_connected_helix(center, twists, length, color, name, radius=0.3):
-    """Generates a helix with internal protein connectors (rungs)."""
-    t = np.linspace(0, length, 100)
-    
-    # Physics modifiers
-    d_twists = twists + (p_mech * 5)
-    d_rad = radius + (thermal * 0.2)
-    
-    # Strand A (The Backbone)
-    x1 = center[0] + d_rad * np.sin(t * d_twists)
-    y1 = center[1] + d_rad * np.cos(t * d_twists)
-    z1 = center[2] + t - (gravity * 1.5)
-    
-    # Strand B (The Complementary Backbone)
-    x2 = center[0] + d_rad * np.sin(t * d_twists + np.pi)
-    y2 = center[1] + d_rad * np.cos(t * d_twists + np.pi)
-    z2 = z1
-    
+def generate_bonded_fibers(center, count, color, name, length=80):
+    """Creates organic fibers with tiny cross-connector rungs."""
     traces = []
-    
-    # Add Backbones
-    traces.append(go.Scatter3d(x=x1, y=y1, z=z1, mode='lines', 
-                               line=dict(color=color, width=8), name=name, opacity=0.8))
-    traces.append(go.Scatter3d(x=x2, y=y2, z=z2, mode='lines', 
-                               line=dict(color=color, width=8), showlegend=False, opacity=0.8))
-    
-    # Add Connectors (The Rungs/Protein Connectors)
-    # We draw lines between x1,y1,z1 and x2,y2,z2 every few steps
-    cx, cy, cz = [], [], []
-    for i in range(0, len(t), 4):
-        cx.extend([x1[i], x2[i], None])
-        cy.extend([y1[i], y2[i], None])
-        cz.extend([z1[i], z2[i], None])
+    for _ in range(count):
+        steps = length
+        # Primary Strand (The Backbone)
+        x = np.cumsum(np.random.normal(0, 0.12, steps)) + center[0]
+        y = np.cumsum(np.random.normal(0, 0.12, steps)) + center[1]
+        z = np.cumsum(np.random.normal(0, 0.12, steps)) - (gravity * 2) + center[2]
         
-    traces.append(go.Scatter3d(x=cx, y=cy, z=cz, mode='lines', 
-                               line=dict(color='white', width=3), 
-                               name=f"{name} Connectors", opacity=0.4))
-    
-    # Add the "Dots" (Protein nodes) on the connectors
-    traces.append(go.Scatter3d(x=x1[::4], y=y1[::4], z=z1[::4], mode='markers',
-                               marker=dict(size=4, color='white', opacity=0.9), showlegend=False))
-    
+        # Secondary Strand (Slightly offset to create the ladder)
+        x2 = x + 0.1
+        y2 = y + 0.1
+        z2 = z 
+
+        # 1. Add the main thick strands
+        traces.append(go.Scatter3d(x=x, y=y, z=z, mode='lines', 
+                                   line=dict(color=color, width=6), opacity=0.7, showlegend=False))
+        
+        # 2. Add the CROSS CONNECTORS (The little bars)
+        cx, cy, cz = [], [], []
+        for i in range(0, steps, 5): # Every 5th point, draw a rung
+            cx.extend([x[i], x2[i], None])
+            cy.extend([y[i], y2[i], None])
+            cz.extend([z[i], z2[i], None])
+            
+        traces.append(go.Scatter3d(x=cx, y=cy, z=cz, mode='lines', 
+                                   line=dict(color='white', width=2), 
+                                   opacity=0.4, name=f"{name} Connectors"))
+        
     return traces
 
 def generate_ra_glob(center, size, color):
-    """Creates the dense Ribosome core."""
-    n = int(600 * weight)
+    """The dense Ribosome meat from the previous successful version."""
+    n = int(550 * weight)
     phi = np.random.uniform(0, 2*np.pi, n)
     costheta = np.random.uniform(-1, 1, n)
     u = np.random.uniform(0, 1, n)
     theta = np.arccos(costheta)
-    r = (size * np.cbrt(u)) * (1 + thermal * 0.3)
+    r = (size * np.cbrt(u)) * (1 + thermal * 0.4)
     
     x = center[0] + r * np.sin(theta) * np.cos(phi)
     y = center[1] + r * np.sin(theta) * np.sin(phi)
-    z = (center[2] + r * np.cos(theta)) - (gravity * 0.8)
+    z = (center[2] + r * np.cos(theta)) - (gravity * 0.7)
     
     return go.Scatter3d(x=x, y=y, z=z, mode='markers',
                         marker=dict(size=np.random.uniform(3, 9, n), 
-                                    color=color, opacity=0.7, colorscale='YlOrRd'),
+                                    color=color, opacity=0.8, colorscale='YlOrRd'),
                         name="RA Ribosome Core")
 
 # --- MAIN INTERFACE ---
-st.title("🧬 RA-RNP Deep Helix Architecture")
-st.markdown("### *Systems Counseling Approach to Connected Genetic Form*")
+st.title("🧬 RA-RNP Fibrogicus (Bonded Edition)")
+st.markdown("### *Systems Counseling Approach to Genetic Connectivity*")
 
 col_viz, col_data = st.columns([3, 1])
 
 with col_viz:
     fig = go.Figure()
 
-    # 1. THE RIBOSOME CORE
-    fig.add_trace(generate_ra_glob([0,0,0], 1.3, "#ff6600"))
+    # 1. THE HEAVY RIBOSOME GLOB (The core "Meat")
+    fig.add_trace(generate_ra_glob([0,0,0], 1.2, "#ff6600"))
     
-    # 2. THE CONNECTED HELICES (The "Real" Strands)
-    # Gold rRA
-    fig.add_traces(generate_connected_helix([0.5, 0.5, -1], 8, 3, "#ffcc00", "rRA Helix"))
-    # Red tRA
-    fig.add_traces(generate_connected_helix([-0.6, -0.4, 0], 6, 2.5, "#ff3333", "tRA Helix"))
-    # Purple snRA (Single strand with markers to look like mRNA)
-    fig.add_traces(generate_connected_helix([0, -0.8, -2], 12, 4, "#aa00ff", "snRA Helix", radius=0.2))
+    # 2. TANGLED BONDED FIBERS (The stringy stuff with bars)
+    fig.add_traces(generate_bonded_fibers([0.3, 0.3, 0], 4, "#ffcc00", "rRA Fibers"))
+    fig.add_traces(generate_bonded_fibers([-0.4, -0.2, 0.5], 3, "#ff3333", "tRA Fibers"))
+    fig.add_traces(generate_bonded_fibers([0.1, -0.5, -0.5], 3, "#aa00ff", "snRA Fibers"))
 
+    # 3. THE OUTER MATRIX
     fig.update_layout(
         template="plotly_dark", height=850, margin=dict(l=0,r=0,b=0,t=0),
         scene=dict(xaxis_visible=False, yaxis_visible=False, zaxis_visible=False,
-                   camera=dict(eye=dict(x=1.5, y=1.5, z=1.2)))
+                   camera=dict(eye=dict(x=1.6, y=1.6, z=1.0)))
     )
     st.plotly_chart(fig, use_container_width=True)
 
 with col_data:
-    st.subheader("🔍 Helix Inspector")
-    st.metric("Molecular Weight", f"{weight:.2f} kDa")
-    st.metric("Tension Score", f"{(p_mech + thermal)/2:.2%}")
-    
+    st.subheader("🔍 Connector Inspector")
+    st.metric("Bonding Integrity", f"{1.0 - (thermal * 0.2):.2%}")
     
     
 
-    st.info("**Counseling Selling Point:** Notice the connectors (the white rungs). These are the 'Bonds'—the shared values and connections that prevent the helices from unraveling under pressure.")
+    st.info("**Counseling Selling Point:** Look at the tiny white bars. Those are the **Bonds**. They represent the micro-connections—the small daily habits—that keep your entire genetic 'fiber' from becoming just a loose wire.")
     
-    st.success("✅ Architecture Bonded")
+    st.success("✅ System Bonded & Stable")
 
-st.caption("RA-RNP Deep Helix Model | 175,000 Residue Simulation | Stanford 2026")
+st.caption("RA-RNP Fibrogicus Bonded | Stanford RNA 3D Challenge 2026")
