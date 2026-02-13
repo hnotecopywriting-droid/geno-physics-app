@@ -2,10 +2,10 @@ import streamlit as st
 import numpy as np
 import plotly.graph_objects as go
 
-# --- PAGE CONFIGURATION ---
-st.set_page_config(page_title="RA High-Def Helix Matrix", layout="wide", initial_sidebar_state="expanded")
+# --- PAGE CONFIG ---
+st.set_page_config(page_title="RA High-Def RNP Model", layout="wide", initial_sidebar_state="expanded")
 
-# --- CUSTOM CSS FOR NEON THEME ---
+# --- CUSTOM NEON THEME ---
 st.markdown("""
     <style>
     .main { background-color: #0e1117; }
@@ -17,103 +17,97 @@ st.markdown("""
 # --- SIDEBAR: 10 CONTROL MATRIX & RESET ---
 st.sidebar.title("🎮 RA Control Matrix")
 
-if st.sidebar.button("🔄 Reset to Natural Equilibrium"):
+if st.sidebar.button("🔄 Reset to Equilibrium"):
     st.rerun()
 
 st.sidebar.subheader("🌍 External Influences")
-p_mech = st.sidebar.slider("Mechanical Pressure (P_mech)", 0.0, 1.0, 0.25)
-t_rad = st.sidebar.slider("Thermal Stress (T_rad)", 0.0, 1.0, 0.35)
-v_res = st.sidebar.slider("Vibrational Res (V_res)", 0.0, 1.0, 0.15)
-c_temp = st.sidebar.slider("Temporal Flow (C_temp)", 0.0, 1.0, 0.50)
-x_bio = st.sidebar.slider("Biodemographic (X_bio)", 0.0, 1.0, 0.20)
+p_mech = st.sidebar.slider("Mechanical Pressure", 0.0, 1.0, 0.25)
+t_rad = st.sidebar.slider("Thermal Stress", 0.0, 1.0, 0.35)
+v_res = st.sidebar.slider("Vibrational Res", 0.0, 1.0, 0.15)
+c_temp = st.sidebar.slider("Temporal Flow", 0.0, 1.0, 0.50)
+x_bio = st.sidebar.slider("Biodemographic", 0.0, 1.0, 0.20)
 
-st.sidebar.markdown("---")
-st.sidebar.subheader("🧬 Internal RA Nodes (100% Reaction)")
-ra1 = st.sidebar.slider("RA Node 1 (Structure)", 0.0, 1.0, p_mech)
-ra2 = st.sidebar.slider("RA Node 2 (Energy)", 0.0, 1.0, t_rad)
-ra3 = st.sidebar.slider("RA Node 3 (Frequency)", 0.0, 1.0, v_res)
-ra4 = st.sidebar.slider("RA Node 4 (Time)", 0.0, 1.0, c_temp)
-ra5 = st.sidebar.slider("RA Node 5 (Biology)", 0.0, 1.0, x_bio)
+# --- CORE RNP GENERATOR ---
+def generate_braided_strand(center, length, radius, base_twists, color, name, thickness=8):
+    t = np.linspace(0, length, 250)
+    # Dynamics tied to sliders
+    d_twists = base_twists + (p_mech * 10)
+    d_rad = radius + (t_rad * 0.5)
+    
+    x = center[0] + d_rad * np.sin(t * d_twists)
+    y = center[1] + d_rad * np.cos(t * d_twists)
+    z = center[2] + t
+    
+    return go.Scatter3d(
+        x=x, y=y, z=z,
+        mode='lines',
+        line=dict(color=color, width=thickness),
+        name=name,
+        opacity=0.9
+    )
 
-# --- HELIX GENERATION ENGINE ---
-def generate_helix_trace(center, length, radius, base_twists, color, name, is_double=False):
-    t = np.linspace(0, length, 150)
-    dynamic_twists = base_twists + (p_mech * 8) 
-    dynamic_radius = radius + (t_rad * 0.4)
-    vibe = np.sin(t * 20) * (v_res * 0.05)
+def generate_ribosome_glob(center, size, color, name):
+    # Generates a dense cluster of points to simulate the RNP complex
+    n = 400
+    phi = np.random.uniform(0, 2*np.pi, n)
+    costheta = np.random.uniform(-1, 1, n)
+    u = np.random.uniform(0, 1, n)
     
-    traces = []
+    theta = np.arccos(costheta)
+    r = size * np.cbrt(u)
     
-    # Strand A
-    x1 = center[0] + (dynamic_radius + vibe) * np.sin(t * dynamic_twists)
-    y1 = center[1] + (dynamic_radius + vibe) * np.cos(t * dynamic_twists)
-    z1 = center[2] + t
+    x = center[0] + r * np.sin(theta) * np.cos(phi)
+    y = center[1] + r * np.sin(theta) * np.sin(phi)
+    z = center[2] + r * np.cos(theta)
     
-    traces.append(go.Scatter3d(
-        x=x1, y=y1, z=z1,
-        mode='lines+markers',
-        line=dict(color=color, width=6),
-        marker=dict(size=3, color=color, opacity=0.8),
+    return go.Scatter3d(
+        x=x, y=y, z=z,
+        mode='markers',
+        marker=dict(size=np.random.uniform(4, 10, n), color=color, opacity=0.7),
         name=name
-    ))
-    
-    if is_double:
-        # Strand B (For Double Helix)
-        x2 = center[0] + (dynamic_radius + vibe) * np.sin(t * dynamic_twists + np.pi)
-        y2 = center[1] + (dynamic_radius + vibe) * np.cos(t * dynamic_twists + np.pi)
-        z2 = z1
-        traces.append(go.Scatter3d(
-            x=x2, y=y2, z=z2,
-            mode='lines+markers',
-            line=dict(color=color, width=6),
-            marker=dict(size=3, color=color, opacity=0.8),
-            showlegend=False
-        ))
-        
-    return traces
+    )
 
-# --- MAIN UI LAYOUT ---
-st.title("🧬 RA-RNP High-Definition Helix Matrix")
-st.markdown("### *Systems Counseling Approach to Genetic Architecture*")
+# --- MAIN INTERFACE ---
+st.title("🧬 RA-RNP Biological Architecture")
+st.markdown("### *Systems Counseling Approach to Genetic Form*")
 
 col_viz, col_data = st.columns([3, 1])
 
 with col_viz:
     fig = go.Figure()
 
-    # 1. THE OUTER GHOST SHELL (Blue Master Helix)
-    fig.add_traces(generate_helix_trace([0,0,-2], 6, 1.5, 2, "rgba(0, 242, 255, 0.15)", "RA Outer Framework", True))
+    # 1. THE CENTRAL RIBOSOME "GLOB" (From your 3rd image)
+    # We layer multiple colors to get that "organic" orange/gold feel
+    fig.add_trace(generate_ribosome_glob([0,0,0], 0.8, "#ffaa00", "Central RNP Glob"))
+    fig.add_trace(generate_ribosome_glob([0,0,0], 0.6, "#ff5500", "RNP Core"))
 
-    # 2. INTERNAL RA HELIX CLUSTERS
-    fig.add_traces(generate_helix_trace([0.4, 0.4, -0.5], 2.5, 0.5, 10, "#ffcc00", "rRA Helix (Gold)"))
-    fig.add_traces(generate_helix_trace([-0.5, -0.2, 0.5], 2.0, 0.4, 6, "#ff3333", "tRA Helix (Red)"))
-    fig.add_traces(generate_helix_trace([0.1, -0.6, -1.5], 1.8, 0.3, 12, "#aa00ff", "snRA Helix (Purple)"))
+    # 2. THE THICK HELICAL STRANDS (Braided RNA)
+    # Purple Strand threading through the middle
+    fig.add_trace(generate_braided_strand([0,0,-3], 6, 0.25, 4, "#aa00ff", "mRNA Template", thickness=12))
+    
+    # Red & Gold strands emerging from the glob
+    fig.add_trace(generate_braided_strand([0.3, 0.3, 0], 2.5, 0.4, 8, "#ffcc00", "rRA Strand", thickness=10))
+    fig.add_trace(generate_braided_strand([-0.3, -0.3, 0], 2.5, 0.4, 8, "#ff3333", "tRA Strand", thickness=10))
+
+    # 3. THE OUTER PROTECTIVE SHELL
+    fig.add_trace(go.Scatter3d(
+        x=2 * np.sin(np.linspace(0, 10, 100)), y=2 * np.cos(np.linspace(0, 10, 100)), z=np.linspace(-3, 3, 100),
+        mode='lines', line=dict(color='rgba(0,242,255,0.05)', width=20),
+        name="Outer RA Matrix"
+    ))
 
     fig.update_layout(
-        template="plotly_dark",
-        height=850,
-        margin=dict(l=0, r=0, b=0, t=0),
-        scene=dict(
-            xaxis_visible=False,
-            yaxis_visible=False,
-            zaxis_visible=False,
-            camera=dict(eye=dict(x=2, y=2, z=1.5))
-        )
+        template="plotly_dark", height=850, margin=dict(l=0,r=0,b=0,t=0),
+        scene=dict(xaxis_visible=False, yaxis_visible=False, zaxis_visible=False)
     )
     st.plotly_chart(fig, use_container_width=True)
 
 with col_data:
-    st.subheader("🔍 Helix Inspector")
-    accuracy = 1.0 - (abs(p_mech - t_rad) * 0.1)
-    st.metric("Pearson Alignment Score", f"{accuracy:.4f}")
+    st.subheader("🔍 RNP Helix Inspector")
+    st.metric("Matrix Alignment", f"{1.0 - abs(p_mech-t_rad)*0.1:.4f}")
     
-    st.markdown("---")
-    st.write("**Current Helix State:**")
-    st.write(f"- Twist Frequency: {2 + (p_mech * 8):.1f} cycles")
-    st.write(f"- Vibrational Jitter: {v_res * 100:.1f} MHz")
     
-    st.info("**Counseling Selling Point:** This model visualizes the 'Double Helix' of human resilience. When external pressure increases, the core RA nodes tighten to protect the system's integrity.")
-    
-    st.success("✅ Systems Matrix Stable")
+    st.info("**Counseling Note:** The 'Glob' in the center represents the client's core. The strands are the connections they make. Under pressure, the glob becomes denser to protect the helix.")
+    st.success("✅ Architecture Stable")
 
-st.caption("RA-RNP High-Def Helix Model | Stanford RNA 3D Challenge 2026")
+st.caption("RA-RNP Biological Model | Inspired by Genomic Phase Separation")
