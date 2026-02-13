@@ -1,17 +1,51 @@
-# 🧬 Geno-Physics: 3D RNA Structural Ensemble
-### Co-developed with Gemini (Google AI)
+# 🧬 The Influence Matrix: RNA-RNP 3D Folding Simulator
 
-This project bridges structural biology with fundamental physics equations.
+### *Predicting 175,000-Residue RNA Structures via Environmental Influence Sliders*
 
-## 🧪 The Physics-Geno Markers
-| Marker | Equation | Duality |
-| :--- | :--- | :--- |
-| **FE-Q** | $F_e = k \frac{q_1 q_2}{r^2}$ | Pos (+) vs. Neg (-) |
-| **Q-MCT** | $Q = mc\Delta T$ | Hot vs. Cold |
-| **F-EXT_INT** | $\sum F = Ma$ | Internal vs. External |
+## 📜 Project Overview
+This project, developed for the **Stanford RNA 3D Folding Challenge**, introduces a dynamic predictive model for large-scale Ribonucleic Acid (RNA) structures. Moving beyond static sequence analysis, this application simulates how outside environmental "pressures" dictate the globular folding patterns of RNA-RNP condensates (the "Rockefeller" model).
+
+### 💡 The Counseling Metaphor
+As a project rooted in **Systems Counseling**, this model treats RNA not as a fixed blueprint, but as a living system in a constant state of negotiation with its environment. Just as external life pressures shape human behavior, environmental stressors shape the 3D geometry of the molecule.
 
 ---
 
-## 🚀 How to Run
-1. Install requirements: `pip install -r requirements.txt`
-2. Run the app: `streamlit run app.py`🧬 Geno-Physics: 3D RNA Structural EnsemblePredicting the Dualities of Life through Physics-Geno MarkersThis project introduces a novel framework for visualizing RNA structural predictions by mapping fundamental physics dualities ("The Big Twos") onto experimental structural data. Using PDB: 1EBQ as the ground truth, we visualize the interplay between thermodynamics, electrostatics, and mechanical forces within a 29-residue helix.🧪 The Physics-Geno MarkersMarkerEquationDualityBiological FocusFE-Q$F_e = k \frac{q_1 q_2}{r^2}$Pos (+) vs. Neg (-)Electrostatic BindingQ-MCT$Q = mc\Delta T$Hot vs. ColdThermal FlexibilityF-EXT_INT$\sum F = Ma$Internal vs. ExternalStructural Integrity🚀 The 5-Truth EnsembleThis application allows researchers to toggle between five distinct conformational "truths," each representing a different physical state of the RNA strand, aligned using US-align logic ($d_0 = 0.7$).
+## ⚙️ How It Works: The 10-Slider System
+The application utilizes a **100% Reaction Rule** to bridge the gap between external influences and internal structural responses.
+
+### 🌍 The 5 Outer Influences (Inputs)
+1. **Mechanical Pressure:** Cellular crowding and volumetric compaction.
+2. **Thermal/Radiative:** Kinetic energy and filament excitation.
+3. **Vibrational Resonance:** Acoustic impact on structural oscillation.
+4. **Temporal/Circadian:** Time-lapse folding and degradation.
+5. **Biodemographic:** Stochastic environmental variables.
+
+### 🧬 The 5 Inner Responses (Outputs)
+- **RA Nodes 1-3:** Interactive "chromosomal hairs" that bend and glow.
+- **Emergent Nodes 4-5:** Speculative internal folding responses.
+
+
+
+---
+
+## 🧪 The Mathematics
+The model calculates the x, y, z coordinates of the C1' atoms using a weighted influence matrix:
+**R_n = (I_x * 1.0) + Σ(I_other * w)**
+*Where w is the "Weighted Sympathy" (10-35%) assigned to secondary filaments.*
+
+---
+
+## 🛠️ Installation & Usage
+1. Clone this repository: `git clone https://github.com/[YOUR-USERNAME]/RNA-Influence-Matrix`
+2. Install dependencies: `pip install -r requirements.txt`
+3. Run the app: `streamlit run app.py`
+
+## 📚 Built With
+* **Python** - Core logic and 100% Reaction Math.
+* **Streamlit** - UI and Slider Interface.
+* **Plotly/Py3Dmol** - 3D Interactive Rendering.
+* **NumPy** - Large-scale coordinate calculations.
+
+---
+**Contact:** [Your Name/Organization]  
+*Part of the Stanford RNA 3D Folding Part 2 Competition*
