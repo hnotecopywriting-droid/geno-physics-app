@@ -22,16 +22,16 @@ t_rad = st.sidebar.slider("Thermal Stress (T_rad)", 0.0, 1.0, 0.35)
 v_res = st.sidebar.slider("Vibrational Res (V_res)", 0.0, 1.0, 0.15)
 
 # --- MAIN LAYOUT ---
-st.title("🧬 RA-RNP 175,000 Bonded Matrix")
-st.markdown("### *Systems Counseling Approach to Bonded RA Protein Strains*")
+st.title("🧬 RA-RNP 175,000 Beaded Strains")
+st.markdown("### *Systems Counseling Approach to Bonded RA Clusters*")
 
 col_main, col_sub = st.columns([2, 1])
 
 with col_main:
     fig = go.Figure()
 
-    # --- 1. THE OUTER SHELL (mRNA Filaments) ---
-    n_pts = 2000
+    # --- 1. THE OUTER SHELL (RA Filaments) ---
+    n_pts = 1500
     indices = np.arange(n_pts)
     phi = np.arccos(1 - 2*indices/n_pts)
     theta = np.pi * (1 + 5**0.5) * indices
@@ -45,36 +45,40 @@ with col_main:
         x=x_shell, y=y_shell, z=z_shell,
         mode='lines', 
         line=dict(color='#00f2ff', width=1), 
-        opacity=0.1,
+        opacity=0.08, # Very ghostly shell
         name="Outer RA Shell"
     ))
 
-    # --- 2. THE BONDED RA CLUSTERS (The 'Strains') ---
+    # --- 2. THE RA CLUSTERS (Beads on a String) ---
     clusters = [
-        {"name": "rRA Strains (Gold)", "color": "#ffcc00", "count": 6},
-        {"name": "tRA Strains (Red)", "color": "#ff3333", "count": 4},
-        {"name": "snRA Strains (Purple)", "color": "#aa00ff", "count": 3}
+        {"name": "rRA (Gold)", "color": "#ffcc00", "count": 6},
+        {"name": "tRA (Red)", "color": "#ff3333", "count": 4},
+        {"name": "snRA (Purple)", "color": "#aa00ff", "count": 3}
     ]
 
     for cluster in clusters:
         for i in range(cluster["count"]):
             # Center of the cluster
-            c_center = np.random.uniform(-0.4, 0.4, 3) * (1.2 - p_mech)
+            c_center = np.random.uniform(-0.5, 0.5, 3) * (1.2 - p_mech)
             
-            # Create a "Strain" by connecting points in a sequence rather than random dots
-            g_pts = 60
-            # Sort points or use a random walk to create a "stringy" look
-            t = np.linspace(0, 1, g_pts)
-            gx = c_center[0] + np.cumsum(np.random.normal(0, 0.04, g_pts)) + (np.sin(t_rad * 5) * 0.05)
-            gy = c_center[1] + np.cumsum(np.random.normal(0, 0.04, g_pts))
-            gz = c_center[2] + np.cumsum(np.random.normal(0, 0.04, g_pts))
+            # Create a "Strain" with dots
+            g_pts = 50
+            # Random walk for organic stringy look
+            gx = c_center[0] + np.cumsum(np.random.normal(0, 0.05, g_pts)) + (np.sin(t_rad * 5) * 0.04)
+            gy = c_center[1] + np.cumsum(np.random.normal(0, 0.05, g_pts))
+            gz = c_center[2] + np.cumsum(np.random.normal(0, 0.05, g_pts))
             
-            # Mode set to 'lines+markers' to see both the bonders and the points
+            # MODE: 'lines+markers' keeps both the strands and the dots!
             fig.add_trace(go.Scatter3d(
                 x=gx, y=gy, z=gz,
                 mode='lines+markers',
-                line=dict(color=cluster["color"], width=3),
-                marker=dict(size=2, color=cluster["color"]),
+                line=dict(color=cluster["color"], width=4),
+                marker=dict(
+                    size=3.5, 
+                    color=cluster["color"],
+                    symbol='circle',
+                    opacity=0.9
+                ),
                 opacity=0.8,
                 name=cluster["name"]
             ))
@@ -94,20 +98,20 @@ with col_main:
 
 with col_sub:
     st.subheader("🔍 RA Bonder Inspector")
-    st.write("The dots are now connected by protein strains, creating the 'stringy' biological reality of the RA model.")
+    st.write("The model now shows both the **Dots (Residues)** and the **Strains (Protein Bonds)**.")
     
     
-    
+
     st.markdown("""
-    - 🟡 **rRA Strains:** Ribosomal bonds
-    - 🔴 **tRA Strains:** Transfer bonds
-    - 🟣 **snRA Strains:** Nuclear splicing bonds
+    - 🟡 **rRA:** Beaded gold strands
+    - 🔴 **tRA:** Beaded red strands
+    - 🟣 **snRA:** Beaded purple strands
     """)
 
     intensity = (p_mech * 1.0) + (t_rad * 0.2)
     st.metric("RA Reaction Intensity", f"{intensity:.2%}")
     st.progress(min(intensity, 1.0))
     
-    st.info("**Counseling Selling Point:** These bonds (strains) represent the connections we hold onto under pressure. They turn isolated 'dots' of experience into a cohesive structure of resilience.")
+    st.info("**Counseling Selling Point:** This shows that we are made of both individual moments (the dots) and the continuous narrative (the strains) that connects them.")
 
-st.caption("RA-RNP Bonded Model | Developed for Stanford RNA Challenge")
+st.caption("RA-RNP Beaded Strain Model | Stanford RNA 3D Challenge Part 2")
